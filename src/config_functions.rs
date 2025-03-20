@@ -26,12 +26,13 @@ pub fn get_config_path() -> PathBuf {
 ///
 /// #Returns
 /// - Hashmap of the parameters that were stored
-pub fn read_config(file_path: &str) -> HashMap<String, String> {
-    let content = fs::read_to_string(file_path).expect("Failed to read config file");
+pub fn read_config(_file_path: &str) -> HashMap<String, String> {
+    let content = check_config_file(); // Ensure config file exists before reading
+
     content
         .lines()
         .filter_map(|line| {
-            let mut parts = line.splitn(2, " = ");
+            let mut parts = line.splitn(2, '=');
             Some((
                 parts.next()?.trim().to_string(),
                 parts.next()?.trim().to_string(),
@@ -50,7 +51,7 @@ pub fn read_config(file_path: &str) -> HashMap<String, String> {
 pub fn check_config_file() -> String {
     let config_path = get_config_path();
 
-    // check if config.txt exists if so, return what's inside
+    // If the config file exists, read and return its content
     if config_path.exists() {
         let mut file = File::open(&config_path).expect("Failed to open config file");
         let mut contents = String::new();
@@ -59,24 +60,25 @@ pub fn check_config_file() -> String {
         return contents;
     }
 
-    // check if parent directory exists
+    // Ensure the parent directory exists
     if let Some(parent) = config_path.parent() {
         fs::create_dir_all(parent).expect("Failed to create documents directory");
     }
 
-    // create content for content.txt
+    // Default content for config.txt
     let default_config = "\
 gzDoom_Path = empty
 wad_Path = empty
 mods_Directory = empty";
 
-    // create new content.txt file
+    // Create and write default values to config.txt
     let mut file = File::create(&config_path).expect("Failed to create config file");
     file.write_all(default_config.as_bytes())
         .expect("Failed to write to config file");
 
     default_config.to_string()
 }
+
 
 /// Updates the gzDoom executable path
 ///

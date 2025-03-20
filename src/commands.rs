@@ -140,17 +140,16 @@ pub fn launch_gzdoom_with_mod(
 /// - Error messages if no zip is selected, no wad file exists, and if it already exists in mod directory
 /// - extracted .wad file is moved to the mods directory
 pub fn extract_and_move_wad(target_dir: &str) -> std::io::Result<()> {
-    // File Dialog to find zip file
+    // Open file dialog for ZIP selection
     let zip_path = FileDialog::new()
         .add_filter("ZIP Files", &["zip"]) // Allow only .zip files
         .pick_file();
 
-    // Check if the user selected a file
     let zip_path = match zip_path {
         Some(path) => path,
         None => {
             println!("No ZIP file selected.");
-            return Ok(());
+            return Ok(()); // Exit if no file was chosen
         }
     };
 
@@ -160,32 +159,49 @@ pub fn extract_and_move_wad(target_dir: &str) -> std::io::Result<()> {
     let file = File::open(&zip_path)?;
     let mut archive = ZipArchive::new(BufReader::new(file))?;
 
+    let mut extracted_wad = false; // Track if we extracted a file
+
     for i in 0..archive.len() {
         let mut file = archive.by_index(i)?;
-        let file_name = file.name().to_string();
+        let file_name = file.name();
 
+        // Skip directories inside ZIP
+        if file_name.ends_with('/') {
+            continue;
+        }
+
+        // Extract only .wad files
         if file_name.to_lowercase().ends_with(".wad") {
-            let final_path = Path::new(target_dir).join(&file_name);
+            let file_stem = Path::new(file_name)
+                .file_name() // Extract filename without directories
+                .ok_or_else(|| std::io::Error::new(std::io::ErrorKind::Other, "Invalid file name"))?
+                .to_string_lossy()
+                .to_string();
 
-            //Check if the file already exists
+            let final_path = Path::new(target_dir).join(&file_stem);
+
+            // Check if file already exists
             if final_path.exists() {
-                println!("File {} already exists in {}", file_name, target_dir);
-                return Ok(()); // Exit without overwriting
+                println!("File {} already exists in {}", file_stem, target_dir);
+                continue; // Check for other WAD files instead of returning immediately
             }
 
-            println!("Extracting: {}", file_name);
+            println!("Extracting: {}", file_stem);
             let mut outfile = File::create(&final_path)?;
             std::io::copy(&mut file, &mut outfile)?;
 
-            // Set file permissions on Linux/macOS
+            // Set file permissions on Unix-based systems
             #[cfg(target_family = "unix")]
             fs::set_permissions(&final_path, fs::Permissions::from_mode(0o644))?;
 
-            println!("Extracted {} to {}", file_name, final_path.display());
-            return Ok(()); // Exit after extracting the first WAD
+            println!("Extracted {} to {}", file_stem, final_path.display());
+            extracted_wad = true;
         }
     }
 
-    println!("No .wad file found in the ZIP.");
+    if !extracted_wad {
+        println!("No .wad file found in the ZIP.");
+    }
+
     Ok(())
 }
