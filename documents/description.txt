@@ -1,0 +1,18 @@
+This application was made in Spring 2025 for Introduction to Rust Development at Portland State University. This software is a companion launcher for GZDoom, a popular open-source project for the original Doom Series by iD. The function of this software is to help the user manage mod files called 'wads' and use GZDoom to launch the game with the mod files.
+
+Version 0.0 Includes:
+- Importing tool to unzip mod files the user has downloaded and store them in a central location.
+- Settings to define the directory paths to reference and run mods and GZDoom.
+- 'Play' Launcher for users to select what mod to run and launch in GZDoom.
+
+Prerequisites:
+Users must have the most recent version of GZDoom on their machine. Along with GZDoom, original or shareware copies of
+either Doom, or Doom II.
+
+Creator:
+Travis Block, Graduate Student at Portland State University.
+
+Crates Used:
+- Slint (UI)
+- rfd (File Directory Tools)
+- zip (File Extraction)

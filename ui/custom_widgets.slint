@@ -1,0 +1,287 @@
+import { ScrollView, VerticalBox, HorizontalBox, Button, ListView } from "std-widgets.slint";
+
+// About widget to share information about my project
+export component About {
+    in property <string> title;
+    in property <string> description;
+    in property <string> version;
+
+    VerticalBox {
+
+        Text {
+            text: title;
+            font-family: "Impact";
+            color: #540e09;
+            stroke: #db2b1f;
+            stroke-width: 2px;
+            height: 50px;
+            font-size: 24px;
+            font-weight: 2;
+        }
+
+        ScrollView {
+        width: parent.width - 40px;
+        height: 350px;
+        viewport-width: parent.width - 50px;
+        viewport-height: t.height;
+            t:= Text {
+                text: description;
+                vertical-alignment: top;
+                wrap: word-wrap;
+                font-size: 16px;
+                width: parent.width - 40px;
+            }
+
+        }
+        Text {
+            text: "Version: " + version;
+            vertical-alignment: bottom;
+            font-size: 14px;
+            color: gray;
+        }
+
+        }
+}
+
+// Settings widget to provide user input for needed parameters to run the application
+export component Settings {
+    in-out property <string> launcherPath: "empty";
+    in-out property <string> modDirectory: "empty";
+    in-out property <string> wadFile: "empty";
+
+    callback getGzDoomLauncher();
+    callback getWadPath();
+    callback getModDirectory();
+
+    VerticalBox {
+    spacing: 50px;
+
+            Text {
+                text: "Settings";
+                font-family: "Impact";
+                color: #540e09;
+                stroke: #db2b1f;
+                stroke-width: 2px;
+                height: 50px;
+                font-size: 24px;
+                font-weight: 2;
+            }
+
+            // Text Input and button for GZDoom Path
+            Rectangle {
+            height: 40px;
+
+            VerticalBox {
+            Text {
+                text: "GZDoom Launcher Path:";
+                font-size: 16px;
+                padding: 10px;
+            }
+
+            HorizontalBox {
+            width: parent.width - 10px;
+            height: 80px;
+
+             TextInput {
+             text: launcherPath;
+             horizontal-alignment: left;
+             vertical-alignment: center;
+             width: parent.width - 100px;
+             height: 30px;
+             font-size: 12px;
+             single-line: true;
+
+                 Rectangle {
+                     border-width: 1px;
+                     border-color:  #db2b1f;
+                     border-radius: 4px;
+                     background: transparent;
+                     width: parent.width + 7px;
+                     height: parent.height + 1px;
+                 }
+
+
+             }
+
+                Button {
+                    text: "search";
+                    height: 31px;
+                    width: 60px;
+                    clicked => {getGzDoomLauncher();}
+                }
+
+            }
+            }
+            }
+
+            // Text Input and button for DOOM2 WAD Path
+            Rectangle {
+                        height: 40px;
+
+                        VerticalBox {
+                        Text {
+                            text: "DOOM2 Wad Path:";
+                            font-size: 16px;
+                            padding: 10px;
+                        }
+
+                        HorizontalBox {
+                        width: parent.width - 10px;
+                        height: 80px;
+
+                         TextInput {
+                         text: wadFile ;
+                         horizontal-alignment: left;
+                         vertical-alignment: center;
+                         width: parent.width - 100px;
+                         height: 30px;
+                         font-size: 12px;
+                         single-line: true;
+
+                             Rectangle {
+                                 border-width: 1px;
+                                 border-color:  #db2b1f;
+                                 border-radius: 4px;
+                                 background: transparent;
+                                 width: parent.width + 7px;
+                                 height: parent.height + 1px;
+                             }
+
+
+                         }
+
+                            Button {
+                                text: "search";
+                                height: 31px;
+                                width: 60px;
+                                clicked => {getWadPath();}
+                            }
+
+                        }
+                        }
+                        }
+
+            // Text Input and button for Mod Directory Path
+            Rectangle {
+                        height: 40px;
+
+                        VerticalBox {
+                        Text {
+                            text: "Mod Directory:";
+                            font-size: 16px;
+                            padding: 10px;
+                        }
+
+                        HorizontalBox {
+                        width: parent.width - 10px;
+                        height: 80px;
+
+                         TextInput {
+                         text: modDirectory;
+                         horizontal-alignment: left;
+                         vertical-alignment: center;
+                         width: parent.width - 100px;
+                         height: 30px;
+                         font-size: 12px;
+                         single-line: true;
+
+                             Rectangle {
+                                 border-width: 1px;
+                                 border-color:  #db2b1f;
+                                 border-radius: 4px;
+                                 background: transparent;
+                                 width: parent.width + 7px;
+                                 height: parent.height + 1px;
+                             }
+
+
+                         }
+
+                            Button {
+                                text: "search";
+                                height: 31px;
+                                width: 60px;
+                                clicked => {getModDirectory();}
+                            }
+
+                        }
+                        }
+                        }
+        }
+}
+
+// a Struct made to hold the file name and paths of mod wads in the mods directory
+export struct ModFile {
+    name: string,
+    path: string,
+}
+
+// Play widget that allows the player to play Doom and the mod wads they have imported
+export component Play {
+
+    in-out property <[ModFile]> mod_files: [];
+    in-out property <string> launcherPath: "empty";
+    in-out property <string> modDirectory: "empty";
+    in-out property <string> wadFile: "empty";
+    in-out property <string> selectedWad: "empty";
+    
+    callback playMod();
+    callback playVanilla();
+    callback modSelected(string);
+
+
+VerticalBox {
+spacing: 10px;
+
+ Text {
+                text: "Mods";
+                font-family: "Impact";
+                color: #540e09;
+                stroke: #db2b1f;
+                stroke-width: 2px;
+                height: 50px;
+                font-size: 24px;
+                font-weight: 2;
+            }
+ Text {
+     text: "Total Mods: " + mod_files.length;
+ }
+    if(modDirectory == "empty" || modDirectory == "") : Text {
+        text: "It looks like you have not defined your mod Directory. please go to the settings menu and set your directory.";
+    }
+    if (modDirectory != "empty" || modDirectory != "") : ListView {
+                for file in mod_files : Rectangle {
+                    height: 30px;
+                    width: parent.width - 30px;
+                    Button {
+                        text: file.name;
+                        width: parent.width;
+                        clicked => {modSelected(file.path); t.text = file.path}
+                    }
+
+}
+}
+    t:= Text {
+        text: "";
+    }
+
+    Button {
+        text: "Play Vanilla Doom";
+        clicked => {playVanilla();}
+        width: parent.width - 50px;
+        height: 30px;
+        enabled: !(launcherPath == "empty" || launcherPath == "" || wadFile == "empty" || wadFile == "");
+    }
+
+    Button {
+        text: "Play Selected Mod";
+        clicked => {playMod();}
+        width: parent.width - 50px;
+        height: 30px;
+        enabled: !(selectedWad == "empty" || selectedWad == "");
+    }
+}
+}
+
+
+

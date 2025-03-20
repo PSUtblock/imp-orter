@@ -4,7 +4,11 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-slint = "1.9.2"
+
+rfd = "0.15.2"
+slint = "1.10.0"
+zip = "2.4.2"
+
 
 [build-dependencies]
-slint-build = "1.9.2"
+slint-build = "1.10.0"

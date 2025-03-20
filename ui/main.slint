@@ -1,0 +1,112 @@
+import { Button, VerticalBox, HorizontalBox, LineEdit } from "std-widgets.slint";
+import {About, Settings, Play} from "./custom_widgets.slint";
+
+// a Struct made to hold the file name and paths of mod wads in the mods directory
+export struct ModFile {
+    name: string,
+    path: string,
+}
+
+// Primary window widget that holds the application. updates will occur within it
+export component MenuApp inherits Window {
+
+    // used to track the 'state' of the window based on buttons pressed
+    in-out property <string> current_view: "About";
+    in-out property <string> description;
+    property <string> version: "0.0";
+    property <string> name: "The Imp-orter";
+
+    // Properties used to store paths to required files
+    in-out property <string> launcherPath: "empty";
+    in-out property <string> modDirectory: "empty";
+    in-out property <string> wadFile: "empty";
+    in-out property <string> selectedWad: "empty";
+    in-out property <[ModFile]> mod_files: [];
+
+    //Callbacks used to update paths and execute code on the Rust side
+    //Callbacks are nested throughout the other widgets so that they update the same Properties
+    callback getGzDoomLauncher();
+    callback getWadPath();
+    callback getModDirectory();
+    callback playVanilla();
+    callback playMod();
+    callback pullConfig();
+    callback importWad();
+
+
+
+    width: 1000px;
+    height: 500px;
+    title: root.name + " " + root.version;
+
+    HorizontalBox {
+
+        Rectangle {
+            width: parent.width / 3;
+            height: parent.height - 10px;
+            background: #333;
+            padding: 10px;
+
+            VerticalBox {
+
+                Button {
+                    text: "Play";
+                    padding: 10px;
+                    clicked => {root.current_view = "Play";}
+
+                }
+
+                Button {
+                    text: "Import";
+                    padding: 10px;
+                    clicked => {importWad();}
+                }
+
+                Button {
+                    text: "Settings";
+                    padding: 10px;
+                    clicked => {root.current_view = "Settings" }
+                }
+            }
+        }
+
+        Rectangle {
+            width: (parent.width * 2) / 3;
+            height: parent.height - 10px;
+            background: #333;
+            padding: 10px;
+
+            // main panel of window that will update based on user interaction with buttons
+            VerticalBox {
+                spacing: 10px;
+                padding: 10px;
+
+                if(current_view == "About") : About {
+                    title: root.name;
+                    description: root.description;
+                    version: root.version;
+                }
+                if(current_view == "Play") :  Play {
+                    launcherPath: root.launcherPath;
+                    wadFile: root.wadFile;
+                    modDirectory: root.modDirectory;
+                    mod_files: root.mod_files;
+                    selectedWad: root.selectedWad;
+                    modSelected(path) => {root.selectedWad = path;}
+                    playMod => {playMod();}
+                    playVanilla => {playVanilla();}
+                }
+                if(current_view == "Settings") : Settings {
+                    launcherPath: root.launcherPath;
+                    wadFile: root.wadFile;
+                    modDirectory: root.modDirectory;
+                    getGzDoomLauncher => {getGzDoomLauncher();}
+                    getWadPath => {getWadPath();}
+                    getModDirectory => {getModDirectory();}
+                }
+
+            }
+        }
+    }
+}
+
